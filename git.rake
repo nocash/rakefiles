@@ -4,12 +4,12 @@ namespace :git do
     entries = File.readlines(ignore_file)
     sorted_entries = entries.sort.uniq
 
-    File.open(ignore_file, 'w') do |f|
+    File.open(ignore_file, "w") do |f|
       sorted_entries.each { |e| f.puts e }
     end
   end
 end
 
 module Git
-  IGNORE_FILE = '.gitignore'
+  IGNORE_FILE = ".gitignore"
 end

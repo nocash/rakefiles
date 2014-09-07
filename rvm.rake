@@ -30,7 +30,7 @@ RvmCurrent = Struct.new(:current_rvm) do
   end
 
   def gemset
-    to_a[1] || ''
+    to_a[1] || ""
   end
 end
 

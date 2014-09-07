@@ -6,8 +6,8 @@ namespace :project do
     chdir project.dir_name
     sh "git init"
 
-    Rake::Task['rvm:versions'].invoke
-    Rake::Task['rvm:gitignore'].invoke
+    Rake::Task["rvm:versions"].invoke
+    Rake::Task["rvm:gitignore"].invoke
   end
 end
 
@@ -15,7 +15,7 @@ Project = Struct.new(:name) do
   def dir_name
     name
       .downcase
-      .tr('^-_ 0-9a-z', '')
-      .tr(' ', '-')
+      .tr("^-_ 0-9a-z", "")
+      .tr(" ", "-")
   end
 end
