@@ -14,6 +14,7 @@ rule /^ruby-(version|gemset)\.template/ do |t|
   template = RvmUseFile.new(t.name)
   current = RvmCurrent.new(`rvm current`)
   content = template.ruby? ? current.ruby : current.gemset
+  next if content.empty?
 
   puts "#{template.name}: #{content}"
   File.open(t.name, "w") { |f| f << content + "\n" }
@@ -25,11 +26,11 @@ RvmCurrent = Struct.new(:current_rvm) do
   end
 
   def ruby
-    to_a.first
+    to_a[0]
   end
 
   def gemset
-    to_a.last
+    to_a[1] || ''
   end
 end
 
