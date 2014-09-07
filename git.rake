@@ -1,11 +1,10 @@
 namespace :git do
   task :sort_ignored do
-    ignore_file = Git::IGNORE_FILE
     entries = File.readlines(ignore_file)
     sorted_entries = entries.sort.uniq
 
-    File.open(ignore_file, "w") do |f|
-      sorted_entries.each { |e| f.puts e }
+    File.open(Git::IGNORE_FILE, "w") do |file|
+      sorted_entries.each { |e| file.puts e }
     end
   end
 end
