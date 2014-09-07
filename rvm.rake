@@ -15,12 +15,21 @@ end
 
 rule /^ruby-(version|gemset)\.template/ do |t|
   template = RvmUseFile.new(t.name)
-  current = RvmCurrent.new(`rvm current`)
-  content = template.ruby? ? current.ruby : current.gemset
-  next if content.empty?
+  content = template.ruby? ? current_rvm.ruby : current_rvm.gemset
 
+  next if content.empty?
   puts "#{template.name}: #{content}"
-  File.open(t.name, "w") { |f| f << content + "\n" }
+  File.open(t.name, "w") { |f| f.puts content }
+end
+
+def current_rvm
+  Rvm.current
+end
+
+module Rvm
+  def self.current
+    @current ||= RvmCurrent.new(`rvm current`)
+  end
 end
 
 RvmCurrent = Struct.new(:current_rvm) do
