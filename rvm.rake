@@ -6,10 +6,7 @@ namespace :rvm do
 
   task :gitignore do
     ignore_files = [".ruby-version", ".ruby-gemset"]
-
-    File.open(Git::IGNORE_FILE, "a") do |file|
-      ignore_files.each { |e| file.puts e }
-    end
+    File.open(Git::IGNORE_FILE, "a") { |f| f.puts ignore_files }
   end
 end
 
