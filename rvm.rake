@@ -1,31 +1,62 @@
 namespace :rvm do
-  task :versions => ["ruby-version.template", "ruby-gemset.template"] do
-    templates = FileList.new("ruby-*.template")
-    templates.each { |f| cp f, f.pathmap(".%X") }
-  end
+  task :default => [".ruby-version", ".ruby-gemset"]
 
   task :gitignore do
     ignore_files = [".ruby-version", ".ruby-gemset"]
     File.open(Git::IGNORE_FILE, "a") { |f| f.puts ignore_files }
   end
+
+  task :templates => [".ruby-version", ".ruby-gemset"] do
+    source_files = FileList[".ruby-*"]
+    source_files.each { |f| cp f, f.pathmap(Rvm::MAP_CONFIG_TO_TEMPLATE) }
+  end
+
+  namespace :templates do
+    task :reverse do
+      source_files = FileList["ruby-*.template"]
+      source_files.each { |f| cp f, f.pathmap(Rvm::MAP_TEMPLATE_TO_CONFIG) }
+    end
+  end
+end
+task :rvm => "rvm:default"
+
+task ".ruby-version", [:ruby] do |t, args|
+  content = args[:ruby] || current_rvm.ruby
+  rvm_file = rvm_file(".ruby-version")
+
+  rvm_file.open("w") { |f| f.puts content }
 end
 
-rule /^ruby-(version|gemset)\.template/ do |t|
-  template = RvmUseFile.new(t.name)
-  content = template.ruby? ? current_rvm.ruby : current_rvm.gemset
+task ".ruby-gemset", [:gemset] do |t, args|
+  content = args[:gemset] || ""
+  rvm_file = rvm_file(".ruby-gemset")
 
-  next if content.empty?
-  puts "#{template.name}: #{content}"
-  File.open(t.name, "w") { |f| f.puts content }
+  if content.empty?
+    next unless current_rvm.gemset?
+    content = current_rvm.gemset
+  end
+
+  rvm_file.open("w") { |f| f.puts content }
 end
 
 def current_rvm
   Rvm.current
 end
 
+def rvm_file(name)
+  Rvm.use_file(name)
+end
+
 module Rvm
+  MAP_TEMPLATE_TO_CONFIG = ".%X"
+  MAP_CONFIG_TO_TEMPLATE = "%{^.,}f.template"
+
   def self.current
     @current ||= RvmCurrent.new(`rvm current`)
+  end
+
+  def self.use_file(name)
+    RvmUseFile.new(name)
   end
 end
 
@@ -41,6 +72,10 @@ RvmCurrent = Struct.new(:current_rvm) do
   def gemset
     to_a[1] || ""
   end
+
+  def gemset?
+    !gemset.empty?
+  end
 end
 
 RvmUseFile = Struct.new(:name) do
@@ -50,5 +85,9 @@ RvmUseFile = Struct.new(:name) do
 
   def gemset?
     name.match(/-gemset/)
+  end
+
+  def open(mode = "r", &block)
+    File.open(name, mode, &block)
   end
 end
