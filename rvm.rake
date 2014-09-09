@@ -52,17 +52,17 @@ module Rvm
   MAP_CONFIG_TO_TEMPLATE = "%{^.,}f.template"
 
   def self.current
-    @current ||= RvmCurrent.new(`rvm current`)
+    @current ||= RvmUseRuby.new(`rvm current`)
   end
 
   def self.use_file(name)
-    RvmUseFile.new(name)
+    RvmUseRubyFile.new(name)
   end
 end
 
-RvmCurrent = Struct.new(:current_rvm) do
+RvmUseRuby = Struct.new(:version) do
   def to_a
-    current_rvm.chomp.split("@")
+    version.chomp.split("@")
   end
 
   def ruby
@@ -78,7 +78,7 @@ RvmCurrent = Struct.new(:current_rvm) do
   end
 end
 
-RvmUseFile = Struct.new(:name) do
+RvmUseRubyFile = Struct.new(:name) do
   def ruby?
     name.match(/-version/)
   end
