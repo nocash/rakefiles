@@ -1,4 +1,6 @@
 namespace :project do
+  task :default => :new
+
   task :new, [:name] do |t, args|
     project = Project.new(args[:name])
 
@@ -6,10 +8,11 @@ namespace :project do
     chdir project.dir_name
     sh "git init"
 
-    Rake::Task["rvm:versions"].invoke
+    Rake::Task["rvm:templates"].invoke
     Rake::Task["rvm:gitignore"].invoke
   end
 end
+task :project, [:name] => "project:default"
 
 Project = Struct.new(:name) do
   def dir_name
